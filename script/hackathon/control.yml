@@ -1,0 +1,134 @@
+:WebcamMesh:
+
+    - :name: Zoom
+      :key: zoom
+      :osc:
+        :address: /1/rotaryA
+        :scale:
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0.7..5.0
+
+    - :name: Mesh Opacity
+      :key: mOpac
+      :osc:
+        :address: /1/rotaryB
+        :scale:
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0.5..1.0
+
+    - :name: Grid Opacity
+      :key: wfOpac
+      :osc:
+        :address: /1/rotaryC
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..0.3
+
+    - :name: Contrast
+      :key: contrast
+      :osc:
+        :address: /1/rotaryD
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..5.0
+
+    - :name: Z Depth
+      :key: zDepth
+      :osc:
+        :address: /1/faderA
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..1000
+
+    - :name: Noise Strength
+      :key: noiseStrength
+      :osc:
+        :address: /1/faderB
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..600
+
+    - :name: Noise Speed
+      :key: noiseSpeed
+      :osc:
+        :address: /1/faderC
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..0.05
+
+    - :name: Noise Scale
+      :key: noiseScale
+      :osc:
+        :address: /1/faderD
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..0.1
+
+    - :name: Invert Z
+      :key: invertZ
+      :osc:
+        :address: /1/toggleA_1
+
+    - :name: Spin X
+      :key: spin_x
+      :osc:
+        :address: /multifaderM/1
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..100
+
+    - :name: Spin Y
+      :key: spin_y
+      :osc:
+        :address: /multifaderM/2
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..100
+
+    - :name: Spin Speed
+      :key: spinSpeed
+      :osc:
+        :address: /multifaderM/3
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..0.002
+
+    - :name: Saturation
+      :key: saturation
+      :osc:
+        :address: /multifaderM/4
+        :scale: 
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..2.0
+
+    - :name: Reset Rotation
+      :key: resetRotation
+      :osc:
+        :address: /encoderM
+
+    - :name: Audio Amount
+      :key: audioAmount
+      :osc:
+        :address: /faderM
+
+    - :name: Hue Rotation
+      :key: hueRotation
+      :osc:
+        :address: /huerotation
+        :scale:
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..360
+
+    - :name: Invert
+      :key: invert
+      :osc:
+        :address: /invert
+        :scale:
+          :from: !ruby/range 0..1.0
+          :to: !ruby/range 0..100
+
+    - :name: Reset
+      :key: reset
+      :osc:
+        :address: /reset
+

@@ -1,0 +1,202 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../../control-hub', 'lib')
+
+# ./script/hackathon script/config/io.yml script/config/control.yml
+
+require "control-hub"
+
+Thread.abort_on_exception = true
+
+class ViewController
+
+  def initialize(controller, controls, options = {})
+    @controls = controls
+    @controller = controller
+    @ignore = options[:ignore]
+    @invert = false
+    @buffer = []
+  end
+
+  def enqueue_hue_rotate
+    @buffer << {
+      :schema => :WebcamMesh,
+      :index => 15,
+      :value => rand(359)
+    }
+  end
+
+  def enqueue_invert
+    @invert = !@invert
+    message = [{
+      :schema => :WebcamMesh,
+      :index => 16,
+      :value => @invert ? 100 : 0 
+    }]
+    @buffer << message
+  end
+
+  def enqueue_random_control
+    schema, control = *get_filtered_random
+    range = get_range(control)
+    @buffer << build_control_message(schema, control, range)
+  end
+
+  def send_all
+    output = @buffer.dup
+    @controller.out(output)
+    @buffer.clear
+    p output
+    output
+  end
+
+  private
+
+  def build_control_message(schema, control, range)
+    {
+      :schema => schema,
+      :index => @controls[schema].index(control),
+      :value => rand(range)
+    }
+  end
+
+  def get_filtered_random
+    schema = nil;
+    control = nil;
+    while schema.nil? || control.nil?
+      s, c = *get_random
+      if @ignore.nil? || @ignore[s].nil? || !@ignore[s].include?(@controls[s].index(c))
+        schema, control = *[s, c]
+      end
+    end
+    [schema, control]
+  end
+
+  def get_random
+    schema = @controls.keys.sample
+    [schema, @controls[schema].sample] 
+  end
+
+  def get_range(control)
+    if !(scale = control[:osc][:scale]).nil? 
+      scale[:to]
+    else
+      (0..1.0)
+    end
+  end
+
+end
+
+class LocalClock
+
+  def self.listen(*a, &block)
+    new(*a).listen(&block)
+  end
+
+  def initialize(*a)
+  end
+
+  def listen(*a, &block)
+    Thread.new do
+      loop do
+        yield if block_given?
+        sleep(1)
+      end
+    end
+  end
+
+end
+
+class RemoteClock
+
+  def self.listen(remote_ip, remote_port, my_ip, &block)
+    new(remote_ip, remote_port).listen(my_ip, &block)
+  end
+
+  def initialize(ip, port)
+    @port = port
+    @server = OSC::EMServer.new(@port)
+    @client = OSC::Client.new(ip, @port)
+    @timestamps = []
+    @start = nil
+    @last = nil
+  end
+
+  def on_beat(num)
+    now = Time.now.to_f
+    unless @last.nil?
+      interval = now - @last
+      @timestamps << interval
+    end
+    @last = now
+    puts "beat: #{num}"
+    yield(num) if block_given?
+  end
+
+  def listen(my_ip, &block)
+    @start = Time.now.to_i
+    @client.send(OSC::Message.new("/subscribe", my_ip, @port))
+    @server.add_method("/down") { |message| on_beat(message.to_a.first, &block) }
+    Thread.new { @server.run }
+  end
+
+  # analyse the tempo based on the last 6 ticks
+  # @timestamps is an array of millisecond values
+  def find_tempo
+    tempo = nil
+    diffs = []
+    @timestamps.shift while @timestamps.length > 6
+    @timestamps.each_with_index { |n, i| (diffs << (@timestamps[i+1] - n)) unless @timestamps[i+1].nil? }
+    unless diffs.empty?
+      avg = (diffs.inject { |a, b| a + b }.to_f / diffs.length.to_f) 
+      tempo = millis_to_bpm(avg)
+    end 
+    @tempo = tempo
+  end
+
+  private
+
+  # convert the raw tick intervals to bpm
+  def millis_to_bpm(ppq24, options = {})
+    qn = options[:qn] || 1
+    quarter_note = (ppq24 * qn.to_f)
+    minute = (60 * 1000) # one minute in millis
+    minute/quarter_note
+  end
+
+end
+
+# files
+network = File.new(ARGV[0])
+control = File.new(ARGV[1])
+
+# setup
+@hub = ControlHub::Hub.new(:io => network, :control => control)
+@controls = @hub.config.controls(:osc)
+@controller = {
+  :input => @hub.inputs(:type => :osc).first,
+  :output => @hub.outputs(:type => :websocket).first
+} 
+@clock = RemoteClock.new("169.254.40.208", 9100)
+@view = ViewController.new(@controller[:output], @controls, :ignore => { :WebcamMesh => [14, 15, 16, 17] })
+@my_ip = @controller[:input].ips.last
+
+def update_rhythm
+  @rhythm = rand(4) + 1
+end
+
+# main
+EM.epoll
+EM.run do
+  @hub.outputs.each(&:start)
+  @clock.listen(@my_ip) do |beat| 
+    update_rhythm
+    if beat != @rhythm
+      @view.enqueue_invert if beat == 1
+      @view.enqueue_hue_rotate if beat == 2
+      @view.enqueue_random_control
+      @view.send_all
+    else
+      puts "rest"
+    end
+  end
+end
