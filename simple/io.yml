@@ -9,5 +9,5 @@
     :server:
       :port: 8000
     :client:
-      :host: 169.254.208.72
+      :host: 192.168.1.129
       :port: 9000
