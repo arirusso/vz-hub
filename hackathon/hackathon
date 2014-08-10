@@ -19,7 +19,7 @@ class ViewController
 
   def enqueue_hue_rotate
     @buffer << {
-      :schema => :WebcamMesh,
+      :namespace => :WebcamMesh,
       :index => 15,
       :value => rand(359)
     }
@@ -28,7 +28,7 @@ class ViewController
   def enqueue_invert
     @invert = !@invert
     message = [{
-      :schema => :WebcamMesh,
+      :namespace => :WebcamMesh,
       :index => 16,
       :value => @invert ? 100 : 0 
     }]
@@ -53,7 +53,7 @@ class ViewController
 
   def build_control_message(schema, control, range)
     {
-      :schema => schema,
+      :namespace => schema,
       :index => @controls[schema].index(control),
       :value => rand(range)
     }
@@ -176,7 +176,7 @@ control = File.new(ARGV[1])
   :input => @hub.inputs(:type => :osc).first,
   :output => @hub.outputs(:type => :websocket).first
 } 
-@clock = RemoteClock.new("169.254.40.208", 9100)
+@clock = LocalClock.new("169.254.40.208", 9100)
 @view = ViewController.new(@controller[:output], @controls, :ignore => { :WebcamMesh => [14, 15, 16, 17] })
 @my_ip = @controller[:input].ips.last
 
