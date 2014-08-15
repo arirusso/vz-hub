@@ -8,6 +8,4 @@
   - :type: osc
     :server:
       :port: 8000
-    :client:
-      :host: 169.254.208.72
-      :port: 9000
+
