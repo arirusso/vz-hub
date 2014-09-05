@@ -1,0 +1,194 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../../control-hub', 'lib')
+
+# ./bac io.yml control.yml
+
+require "control-hub"
+require "topaz"
+
+class ViewController
+
+  def initialize(controller, controls, options = {})
+    @controls = controls
+    @controller = controller
+    @ignore = options[:ignore]
+    @invert = false
+    @buffer = []
+  end
+
+  def enqueue_hue_rotate
+    @buffer << {
+      :namespace => :WebcamMesh,
+      :index => 15,
+      :value => rand(359)
+    }
+  end
+
+  def enqueue_invert
+    @invert = !@invert
+    message = [{
+      :namespace => :WebcamMesh,
+      :index => 16,
+      :value => @invert ? 100 : 0 
+    }]
+    @buffer << message
+  end
+
+  def enqueue_random_control
+    schema, control = *get_filtered_random
+    range = get_range(control)
+    @buffer << build_control_message(schema, control, range)
+  end
+
+  def send_all
+    output = @buffer.dup
+    @controller.out(output)
+    @buffer.clear
+    output
+  end
+
+  private
+
+  def build_control_message(schema, control, range)
+    {
+      :namespace => schema,
+      :index => @controls[schema].index(control),
+      :value => rand(range)
+    }
+  end
+
+  def get_filtered_random
+    schema = nil;
+    control = nil;
+    while schema.nil? || control.nil?
+      s, c = *get_random
+      if @ignore.nil? || @ignore[s].nil? || !@ignore[s].include?(@controls[s].index(c))
+        schema, control = *[s, c]
+      end
+    end
+    [schema, control]
+  end
+
+  def get_random
+    schema = @controls.keys.sample
+    [schema, @controls[schema].sample] 
+  end
+
+  def get_range(control)
+    if !(scale = control[:osc][:scale]).nil? 
+      scale[:hub]
+    else
+      (0..1.0)
+    end
+  end
+
+end
+
+class LocalClock
+
+  def self.listen(*args, &block)
+    new(*args).listen(&block)
+  end
+
+  def initialize(*args)
+  end
+
+  def listen(*args, &block)
+    thread = Thread.new do
+      loop do
+        yield if block_given?
+        sleep(1)
+      end
+    end
+    thread.abort_on_exception = true
+  end
+
+end
+
+class MIDIClock
+
+  def self.listen(&block)
+    new.listen(&block)
+  end
+
+  def initialize
+    @input = UniMIDI::Input.gets
+    @timestamps = []
+    @start = nil
+    @last = nil
+    @num = 0
+    @tick = 0
+    @chars = %w{ | / - \\ } 
+    @phase = 0
+  end
+
+  def animate
+    if @phase == 0
+      print @chars[0] 
+      @phase = 1
+    else
+      print "\b"  
+      @chars.push(@chars.shift)
+      @phase = 0
+    end
+  end
+
+  def beat
+    @num == 3 ? @num = 0 : @num += 1
+  end
+
+  def on_tick(&block)
+    #puts "tick: #{@tick}"
+    beat if @tick == 0
+    animate if (@tick + 1) % 8 == 0
+    if @tick == 23
+      @tick = 0
+    else
+      @tick += 1
+    end
+    yield(@num) if block_given?
+  end
+
+  def listen(&block)
+    @start = Time.now.to_i
+    @tempo = Topaz::Tempo.new(@input) { self.on_tick(&block) }
+    @tempo.start(:background => true)
+  end
+
+end
+
+# files
+network = File.new("io.yml")
+control = File.new("control.yml")
+
+# setup
+@hub = ControlHub::Hub.new(:io => network, :control => control)
+@controls = @hub.config.controls(:osc)
+@controller = {
+  :input => @hub.inputs(:type => :osc).first,
+  :output => @hub.outputs(:type => :websocket).first
+} 
+@clock = MIDIClock.new
+@view = ViewController.new(@controller[:output], @controls, :ignore => { :WebcamMesh => [14, 15, 16, 17] })
+
+def update_rhythm
+  @rhythm = rand(4) + 1
+end
+
+# main
+EM.epoll
+EM.run do
+  @hub.outputs.each(&:start)
+  @clock.listen do |beat| 
+    update_rhythm
+    if beat != @rhythm
+      @view.enqueue_invert if beat == 1
+      @view.enqueue_hue_rotate if beat == 2
+      @view.enqueue_random_control
+      @view.send_all
+    else
+      puts "rest"
+    end
+  end
+  @hub.send(:enable_inputs)
+end

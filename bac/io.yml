@@ -1,0 +1,11 @@
+:output:
+  - :type: websocket
+    :host: localhost
+    :port: 9006
+:input:
+  - :type: midi
+    :input: choose
+  - :type: osc
+    :server:
+      :port: 8000
+
