@@ -1,13 +1,16 @@
-:output:
+:nodes:
   - :type: websocket
+    :id: 1
     :host: localhost
     :port: 9006
-:input:
   - :type: midi
-    :input: choose
+    :direction: input
+    :id: 2
+    :name: choose
   - :type: osc
     :server:
       :port: 8000
     :client:
-      :host: 192.168.1.129
+      :host: 192.168.1.136
       :port: 9000
+    :id: 3

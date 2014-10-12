@@ -1,5 +1,8 @@
+---
 :WebcamMesh:
-
+  :node_map:
+    [2, 3]: 1
+  :action:
     - :name: Zoom
       :key: zoom
       :osc:
