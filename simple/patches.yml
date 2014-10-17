@@ -5,67 +5,67 @@
     :action:
       - :name: Zoom
         :key: zoom
+        :default:
+          :scale: !ruby/range 0.1..5.0
         :osc:
           :address: /1/rotaryA
-          :scale:
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0.1..5.0
+          :scale: !ruby/range 0..1.0
 
       - :name: Mesh Opacity
         :key: mOpac
+        :default: 
+          :scale: !ruby/range 0..1.0
         :osc:
           :address: /1/rotaryB
-          :scale:
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..1.0
+          :scale: !ruby/range 0..1.0
 
       - :name: Grid Opacity
         :key: wfOpac
+        :default:
+          :scale: !ruby/range 0..0.3
         :osc:
           :address: /1/rotaryC
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..0.3
+          :scale: !ruby/range 0..1.0
 
       - :name: Contrast
         :key: contrast
+        :default:
+          :scale: !ruby/range 0..5.0
         :osc:
           :address: /1/rotaryD
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..5.0
+          :scale: !ruby/range 0..1.0
 
       - :name: Z Depth
         :key: zDepth
+        :default:
+          :scale: !ruby/range 0..1000
         :osc:
           :address: /1/faderA
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..1000
+          :scale: !ruby/range 0..1.0
 
       - :name: Noise Strength
         :key: noiseStrength
+        :default:
+          :scale: !ruby/range 0..600
         :osc:
           :address: /1/faderB
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..600
+          :scale: !ruby/range 0..1.0
 
       - :name: Noise Speed
         :key: noiseSpeed
+        :default:
+          :scale: !ruby/range 0..0.05
         :osc:
           :address: /1/faderC
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..0.05
+          :scale: !ruby/range 0..1.0
 
       - :name: Noise Scale
         :key: noiseScale
+        :default:
+          :scale: !ruby/range 0..0.1
         :osc:
           :address: /1/faderD
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..0.1
+          :scale: !ruby/range 0..1.0
 
       - :name: Invert Z
         :key: invertZ
@@ -74,35 +74,35 @@
 
       - :name: Spin X
         :key: spin_x
+        :default:
+          :scale: !ruby/range 0..100
         :osc:
           :address: /multifaderM/1
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..100
+          :scale: !ruby/range 0..1.0
 
       - :name: Spin Y
         :key: spin_y
+        :default:
+          :scale: !ruby/range 0..100
         :osc:
           :address: /multifaderM/2
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..100
+          :scale: !ruby/range 0..1.0
 
       - :name: Spin Speed
         :key: spinSpeed
+        :default:
+          :scale: !ruby/range 0..0.002
         :osc:
           :address: /multifaderM/3
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..0.002
+          :scale: !ruby/range 0..1.0
 
       - :name: Saturation
         :key: saturation
+        :default:
+          :scale: !ruby/range 0..2.0
         :osc:
           :address: /multifaderM/4
-          :scale: 
-            :osc: !ruby/range 0..1.0
-            :hub: !ruby/range 0..2.0
+          :scale: !ruby/range 0..1.0
 
       - :name: Reset Rotation
         :key: resetRotation
