@@ -1,0 +1,2 @@
+#!/bin/sh
+../../patch/bin/patch nodes.yml patches.yml
