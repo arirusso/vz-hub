@@ -13,7 +13,7 @@
 
       - :name: Mesh Opacity
         :key: mOpac
-        :default: 
+        :default:
           :scale: !ruby/range 0..1.0
         :osc:
           :address: /1/rotaryB
@@ -96,10 +96,10 @@
           :address: /multifaderM/3
           :scale: !ruby/range 0..1.0
 
-      - :name: Saturation
-        :key: saturation
+      - :name: Hue
+        :key: hue
         :default:
-          :scale: !ruby/range 0..2.0
+          :scale: !ruby/range 0..359
         :osc:
           :address: /multifaderM/4
           :scale: !ruby/range 0..1.0
